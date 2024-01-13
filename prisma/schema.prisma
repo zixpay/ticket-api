@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Establishment {
+  id            String  @id @default(uuid()) @db.Uuid
+  token         String
+  establishment String
+  page_url      String  @unique @default(cuid())
+  name          String
+  fantasy_name  String @unique
+  document      String
+  seller_id     String
+  email         String?
+  logo_url      String?
+  phone         String?
+  fine_value    Decimal
+  daily_arrears Decimal
+
+  addresses Address[]
+
+  @@map("establishments")
+}
+
+model User {
+  id                  String    @id @default(uuid()) @db.Uuid
+  document            String    @unique
+  name                String
+  email               String
+  phone               String
+  birthdate           String
+  recipient_document  String?
+  recipient_name      String?
+  recipient_email     String?
+  recipient_phone     String?
+  recipient_birthdate String?
+  created_at          DateTime  @default(now())
+  updated_at          DateTime? @updatedAt
+  deleted_at          DateTime?
+
+  addresses Address[]
+  cards     Card[]
+  payments  Payment[]
+
+  @@map("users")
+}
+
+model Payment {
+  id              String @id @default(uuid()) @db.Uuid
+  user_id         String @db.Uuid
+  amount          Float
+  installments    Int
+  value           Float
+  deadline        String
+  recipient       String
+  seller_name     String
+  seller_document String
+  seller_email    String
+  seller_phone    String
+  fees            Float?
+
+  user User @relation(fields: [user_id], references: [id])
+
+  @@map("payments")
+}
+
+model Card {
+  id                    String @id @default(uuid()) @db.Uuid
+  user_id               String @db.Uuid
+  card_last_four_digits String @unique
+  card_owner            String
+  expiry                String
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("cards")
+}
+
+model Address {
+  id               String  @id @default(uuid()) @db.Uuid
+  user_id          String? @db.Uuid
+  establishment_id String? @db.Uuid
+  zip_code         String
+  state            String
+  city             String
+  neighborhood     String
+  street           String
+  number           String
+  complement       String?
+
+  user          User?          @relation(fields: [user_id], references: [id])
+  establishment Establishment? @relation(fields: [establishment_id], references: [id])
+
+  @@map("addresses")
+}

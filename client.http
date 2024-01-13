@@ -1,0 +1,78 @@
+@baseUrl = http://localhost:3333
+
+# @name create_establishment
+POST {{baseUrl}}/establishments
+Content-Type: application/json
+
+{
+  "daily_arrears": "",
+  "establishment": "45879",
+  "fine_value": "",
+  "token": "aa9acaf6f1ca2b52c133b03e85a9418308c40f0b"
+}
+
+###
+
+# @name show_establishment
+GET {{baseUrl}}/establishments/am-imoveis
+Content-Type: application/json
+
+###
+
+# @name create_user
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+    "document": "09899291676",
+    "name": "Bruno Vilefort",
+    "birthdate": "1999/07/24",
+    "email": "bruno@mail.com",
+    "phone": "5531991505564",
+    "recipient_document": "",
+    "recipient_name": "claudio rodrigues",
+    "recipient_email": "claudinho@orrkut.com",
+    "recipient_phone": "5533958484484",
+    "recipient_birthdate": "1948-05-09",
+    "zip_code": "35457013",
+    "state": "MG",
+    "city": "Itabirito",
+    "neighborhood": "Inconfidentes",
+    "street": "Rua Arlindo Francisco Fernandes",
+    "number": "72"
+}
+
+
+###
+
+# @name execute_sell
+POST {{baseUrl}}/establishments/sell
+Content-Type: application/json
+
+{
+  "birthdate": "24/07/1999",
+  "card_number": "4768948484848484",
+  "card_owner": "BRUNO V. CLARA",
+  "city": "Itabirito",
+  "complement": "",
+  "cvc": "123",
+  "document": "098.992.916-76",
+  "email": "bruno.clara@yahoo.com",
+  "expiry": "01/2027",
+  "full_value": "818,14",
+  "name": "Bruno Clara",
+  "neighborhood": "Inconfidentes",
+  "number": "72",
+  "phone": "+55 (31) 99150-5564",
+  "quantity": 2,
+  "recipient_birthdate": "26/02/1987",
+  "recipient_document": "48.423.114/5155-46",
+  "recipient_email": "clebin@mail.com",
+  "recipient_name": "cleber",
+  "recipient_phone": "+55 (11) 59858-4848",
+  "sell_token": "am-imoveis",
+  "state": "",
+  "street": "Rua Arlindo Francisco Fernandes",
+  "user_ip_address": "191.5.85.226",
+  "zip_code": "35457-013"
+}
