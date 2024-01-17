@@ -9,7 +9,7 @@ services:
     environment:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: docker
-        POSTGRES_DB: zixpay_ticket
+        POSTGRES_DB: zixpay
         PG_DATA: /data/postgres
     volumes:
       - ./data/pg:/data/postgres

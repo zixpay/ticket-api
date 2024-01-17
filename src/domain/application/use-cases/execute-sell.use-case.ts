@@ -1,10 +1,10 @@
-import { existsSync } from 'node:fs'
-import { join } from 'node:path'
+import fs, { existsSync, mkdirSync } from 'node:fs'
+import path, { join, resolve } from 'node:path'
 import { HttpService as AxiosHttpModule } from '@nestjs/axios'
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { ExecuteSellOutput } from '@/core/interfaces/sell'
 import { firstValueFrom } from 'rxjs'
-import ExcelJS, { Workbook, Worksheet } from 'exceljs'
+import * as ExcelJS from 'exceljs'
 
 import {
   normalizeCellNumber,
@@ -35,7 +35,7 @@ interface Input {
   zipCode: string
 }
 
-export type Output = boolean
+// export type Output = boolean
 
 @Injectable()
 export class ExecuteSellUseCase {
@@ -44,7 +44,7 @@ export class ExecuteSellUseCase {
     private readonly establishmentRepository: EstablishmentsRepository,
   ) {}
 
-  async execute(body: Input): Promise<Output> {
+  async execute(body: Input): Promise<any> {
     const {
       birthdate,
       cardNumber,
@@ -110,15 +110,27 @@ export class ExecuteSellUseCase {
       Authorization: `Bearer ${realEstateToken?.token}`,
     }
 
-    const workbook: Workbook = new ExcelJS.Workbook()
+    const response = await firstValueFrom(
+      this.httpService.post<ExecuteSellOutput>(newSellUrl, data, { headers }),
+    )
+
     const currentDate = new Date()
     const day = currentDate.getDate().toString().padStart(2, '0')
     const month = (currentDate.getMonth() + 1).toString().padStart(2, '0')
     const year = currentDate.getFullYear()
-    const formattedDate = day + '/' + month + '/' + year
+    const formattedDate = day + '-' + month + '-' + year
     const fileName = `payments-${formattedDate}.xlsx`
-    const filePath = join(__dirname, 'tmp', fileName)
-    let sheet: Worksheet | undefined
+
+    const dirPath = resolve(__dirname, '..', '..', '..', '..', '..', 'tmp')
+    if (!existsSync(dirPath)) {
+      mkdirSync(dirPath, { recursive: true })
+    }
+
+    const filePath = join(dirPath, fileName)
+    console.log('Arquivo será criado em:', filePath)
+
+    const workbook = new ExcelJS.Workbook()
+    let sheet
 
     if (existsSync(filePath)) {
       await workbook.xlsx.readFile(filePath)
@@ -128,38 +140,38 @@ export class ExecuteSellUseCase {
       }
     } else {
       workbook.creator = 'Zixpay-System'
-      workbook.created = new Date(formattedDate)
+      const formattedDateISO = `${year}-${month}-${day}`
+      workbook.created = new Date(formattedDateISO)
       workbook.calcProperties.fullCalcOnLoad = true
       sheet = workbook.addWorksheet('payments - ' + formattedDate)
+
       sheet.columns = [
-        { header: 'Nome', key: 'nome', width: 50 },
-        { header: 'E-mail', key: 'email', width: 80 },
-        { header: 'CPF/CNPJ', key: 'cpf-cnpj', width: 30 },
-        { header: 'Celular', key: 'celular', width: 50 },
-        { header: 'Número do cartão', key: 'número do cartão', width: 30 },
-        { header: 'Titular do cartão', key: 'titular do cartão', width: 50 },
-        { header: 'Parcelas', key: 'parcelas', width: 30 },
-        { header: 'Valor', key: 'fullValue', width: 30 },
+        { header: 'Nome', key: 'nome', width: 40 },
+        { header: 'E-mail', key: 'email', width: 50 },
+        { header: 'CPF/CNPJ', key: 'cpf-cnpj', width: 15 },
+        { header: 'Celular', key: 'celular', width: 15 },
+        { header: 'Número do cartão', key: 'número do cartão', width: 10 },
+        { header: 'Titular do cartão', key: 'titular do cartão', width: 40 },
+        { header: 'Parcelas', key: 'parcelas', width: 5 },
+        { header: 'Valor', key: 'valor', width: 30 },
       ]
     }
 
-    sheet.addRow({
-      nome: name,
+    const lastRow = sheet.lastRow
+    const newRow = sheet.getRow(lastRow.number + 1)
+    newRow.values = [
+      name,
       email,
-      'cpf-cnpj': document,
-      celular: phone,
-      'número do cartão': cardNumber.slice(-4),
-      'titular do cartão': cardOwner,
-      parcelas: quantity,
-      valor: fullValue,
-    })
+      document,
+      phone,
+      cardNumber.slice(-4),
+      cardOwner,
+      quantity,
+      fullValue,
+    ]
 
     await workbook.xlsx.writeFile(filePath)
-
-    const response = await firstValueFrom(
-      this.httpService.post<ExecuteSellOutput>(newSellUrl, data, { headers }),
-    )
-    console.log(response)
+    console.log('Arquivo salvo com sucesso.')
 
     return response?.data?.success?.valueOf()
   }
