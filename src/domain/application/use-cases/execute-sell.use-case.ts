@@ -1,5 +1,5 @@
-import fs, { existsSync, mkdirSync } from 'node:fs'
-import path, { join, resolve } from 'node:path'
+import { existsSync, mkdirSync } from 'node:fs'
+import { join, resolve } from 'node:path'
 import { HttpService as AxiosHttpModule } from '@nestjs/axios'
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { ExecuteSellOutput } from '@/core/interfaces/sell'
@@ -35,7 +35,7 @@ interface Input {
   zipCode: string
 }
 
-// export type Output = boolean
+export type Output = boolean
 
 @Injectable()
 export class ExecuteSellUseCase {
@@ -44,7 +44,7 @@ export class ExecuteSellUseCase {
     private readonly establishmentRepository: EstablishmentsRepository,
   ) {}
 
-  async execute(body: Input): Promise<any> {
+  async execute(body: Input): Promise<Output> {
     const {
       birthdate,
       cardNumber,

@@ -33,6 +33,8 @@ export class CreateEstablishmentUseCase {
     establishment,
     token,
   }: Input): Promise<Output> {
+    console.log('token', token)
+
     const urlToFetchInfo =
       'https://api.zsystems.com.br/estabelecimentos/' + establishment
 
@@ -42,11 +44,12 @@ export class CreateEstablishmentUseCase {
         {
           headers: {
             'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer b2db5b3911520e19b5a1583758d45488ee7bfe7b`,
+            Authorization: `Bearer 18eb9aa1a8cf7b0ce4d6265fffc7493c611e409c`,
           },
         },
       ),
     )
+    console.log(data)
 
     const url = await this.establishmentRepository.findByToken(token)
     if (url) {
